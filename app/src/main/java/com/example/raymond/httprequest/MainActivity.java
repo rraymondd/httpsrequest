@@ -1,17 +1,25 @@
 package com.example.raymond.httprequest;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-import  cz.msebera.android.httpclient.Header;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class MainActivity extends AppCompatActivity {
 
     private static EditText username;
@@ -25,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void LoginButton(){
+    public void LoginButton() {
         username = (EditText)findViewById(R.id.editText);
         password = (EditText)findViewById(R.id.editText2);
         button = (Button)findViewById(R.id.button);
@@ -34,8 +42,12 @@ public class MainActivity extends AppCompatActivity {
             new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    if (username.getText().toString().equals("user") && password.getText().toString().equals("password")){
-                        RequestToServer(username.toString(), password.toString());
+                    if (username.getText().toString().equals("user") && password.getText().toString().equals("pass")){
+
+
+                            RequestToServer(username.getText().toString(), password.getText().toString());
+
+
                     }
                 }
 
@@ -43,21 +55,62 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    public void RequestToServer(String user, String pass){
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("username", user);
-        params.put("password", pass);
-        client.post("https://reachme.com", params, new AsyncHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                Toast.makeText(MainActivity.this,"success",Toast.LENGTH_SHORT).show();
-            }
+    public void RequestToServer(final String user, final String pass) {
 
+        final Handler mHandler = new Handler();
+
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Toast.makeText(MainActivity.this,"fail",Toast.LENGTH_SHORT).show();
+            public void run() {
+
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                String url ="http://102.reachme.com/sms";
+
+
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(final String response) {
+
+
+
+                                    Handler handler = new Handler(Looper.getMainLooper());
+
+                                    handler.post(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }
+                        , new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //This code is executed if there is an error.
+                    }
+                }) {
+                    protected Map<String, String> getParams() {
+                        Map<String, String> MyData = new HashMap<>();
+                        MyData.put("username", user);
+                        MyData.put("password", pass);
+                        return MyData;
+                    }
+                };
+
+                queue.add(stringRequest);
+
+
             }
         });
-}
-    }
+
+        thread.start();
+
+
+
+    }}
+
+
+
+
