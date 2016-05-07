@@ -2,10 +2,14 @@ package com.example.raymond.httprequest;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.EditText;
+import android.widget.ListView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Shon on 5/5/2016.
@@ -15,33 +19,44 @@ public class SecondActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
-        try {
-            JSONObject json = new JSONObject(getIntent().getStringExtra("json"));
-            String server = json.getString("server");
-            String port = json.getString("port");
-            String username = json.getString("username");
-            String password = json.getString("password");
-            EditText editText1 = (EditText)findViewById(R.id.editText1);
-            editText1.setText("server");
-            EditText editText2 = (EditText)findViewById(R.id.editText2);
-            editText2.setText(server);
-            EditText editText3 = (EditText)findViewById(R.id.editText3);
-            editText3.setText("port");
-            EditText editText4 = (EditText)findViewById(R.id.editText4);
-            editText4.setText(port);
-            EditText editText5 = (EditText)findViewById(R.id.editText5);
-            editText5.setText("username");
-            EditText editText6 = (EditText)findViewById(R.id.editText6);
-            editText6.setText(username);
-            EditText editText7 = (EditText)findViewById(R.id.editText7);
-            editText7.setText("password");
-            EditText editText8 = (EditText)findViewById(R.id.editText8);
-            editText8.setText(password);
 
+        try {
+            String jsonArray = getIntent().getStringExtra("json");
+            JSONArray jsonarray = new JSONArray(jsonArray);
+
+            SetAdapterJson(jsonarray);
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void SetAdapterJson (JSONArray jsonArray) throws JSONException {
+
+        List<Line> lineList = new ArrayList<Line>();
+        ListView listView;
+        CustomListAdapter adapter;
+        listView = (ListView) findViewById(R.id.list);
+        adapter = new CustomListAdapter(this, lineList);
+        listView.setAdapter(adapter);
+
+        JSONObject jsonobject = jsonArray.getJSONObject(0);
+        JSONArray jsonArray1 = jsonobject.getJSONArray("lines");
+
+
+
+            for (int i=0;i< jsonArray1.length();i++) {
+                JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
+                String server = jsonObject2.getString("server");
+            String port = jsonObject2.getString("port");
+            String username = jsonObject2.getString("username");
+            String password = jsonObject2.getString("password");
+
+              Line line = new Line(server, port, username, password);
+                lineList.add(line);
+            }
+
+            adapter.notifyDataSetChanged();
         }
 
 
     }
-}

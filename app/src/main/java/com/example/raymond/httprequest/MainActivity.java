@@ -16,9 +16,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,16 +74,14 @@ public class MainActivity extends AppCompatActivity {
 
                                     @Override
                                     public void run() {
-                                        try {
-                                            JSONObject json = new JSONObject(response);
+
+
                                             Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                                            intent.putExtra("json", json.toString());
+                                            intent.putExtra("json", response.toString());
                                             startActivity(intent);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
                                         }
-                                    }
-                                });
+                                    });
+
                             }
                         }
                         , new Response.ErrorListener() {
